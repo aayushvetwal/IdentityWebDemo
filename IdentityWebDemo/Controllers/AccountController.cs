@@ -12,8 +12,8 @@ namespace IdentityWebDemo.Controllers
 {
     public class AccountController : Controller
     {
-        public UserManager<IdentityUser> UserManager => HttpContext.GetOwinContext().Get<UserManager<IdentityUser>>();
-        public SignInManager<IdentityUser, string> SignInManager => HttpContext.GetOwinContext().Get<SignInManager<IdentityUser, string>>();
+        public UserManager<ExtendedUser> UserManager => HttpContext.GetOwinContext().Get<UserManager<ExtendedUser>>();
+        public SignInManager<ExtendedUser, string> SignInManager => HttpContext.GetOwinContext().Get<SignInManager<ExtendedUser, string>>();
 
         public ActionResult Login()
         {
@@ -54,7 +54,13 @@ namespace IdentityWebDemo.Controllers
             }
             //end
 
-            var identityResult = await UserManager.CreateAsync(new IdentityUser(model.Username), model.Password);
+            var user = new ExtendedUser
+            {
+                UserName = model.Username,
+                FullName = model.FullName
+            };
+            user.Addresses.Add(new Address { AddressLine = model.AddressLine, Country = model.Country, UserId = user.Id });
+            var identityResult = await UserManager.CreateAsync(user, model.Password);
 
             if (identityResult.Succeeded)
             {
@@ -77,6 +83,9 @@ namespace IdentityWebDemo.Controllers
     {
         public string Username { get; set; }
         public string Password { get; set; }
+        public string FullName { get; set; }
+        public string AddressLine { get; set; }
+        public string Country { get; set; }
     }
     
 }
